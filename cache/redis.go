@@ -79,8 +79,12 @@ func (r *Redis) Set(key string, val interface{}, timeout time.Duration) (err err
 	defer conn.Close()
 
 	var data []byte
-	if data, err = json.Marshal(val); err != nil {
-		return
+	if d, ok := val.([]byte); ok {
+		data = d
+	} else {
+		if data, err = json.Marshal(val); err != nil {
+			return
+		}
 	}
 
 	_, err = conn.Do("SETEX", key, int64(timeout/time.Second), data)
